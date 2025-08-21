@@ -2,6 +2,8 @@ package com.example.utkarshbackend.services;
 import com.example.utkarshbackend.dto.AuthUser;
 import com.example.utkarshbackend.entity.Teacher;
 import com.example.utkarshbackend.repository.TeacherRepo;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -12,6 +14,12 @@ import java.util.Optional;
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
+    @Value("${admin.email}")
+    private String adminEmail;
+
+    @Value("${admin.password}")
+    private String adminPassword;
+
     private final TeacherRepo teacherRepo;
 
     public UserDetailsServiceImpl(TeacherRepo teacherRepo) {
@@ -20,6 +28,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+
+        if(email.equalsIgnoreCase(adminEmail)) {
+            return User.withUsername(adminEmail)
+                    .password("{noop}" + adminPassword)
+                    .roles("ADMIN")
+                    .build();
+        }
 
         Optional<Teacher> teacher = teacherRepo.findByEmail(email);
         if(teacher.isPresent()) {
