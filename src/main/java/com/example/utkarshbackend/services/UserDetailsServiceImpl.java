@@ -31,7 +31,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         if(email.equalsIgnoreCase(adminEmail)) {
             return User.withUsername(adminEmail)
-                    .password("{noop}" + adminPassword)
+                    .password(adminPassword)
                     .roles("ADMIN")
                     .build();
         }
