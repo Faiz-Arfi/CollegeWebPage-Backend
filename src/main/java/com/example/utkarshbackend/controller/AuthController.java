@@ -1,5 +1,6 @@
 package com.example.utkarshbackend.controller;
 
+import com.example.utkarshbackend.dto.AdminRequestDTO;
 import com.example.utkarshbackend.dto.LoginRequestDTO;
 import com.example.utkarshbackend.dto.LoginResponseDTO;
 import com.example.utkarshbackend.dto.UserDTO;
@@ -52,20 +53,15 @@ public class AuthController {
 
         String email = authentication.getName();
         String role = authentication.getAuthorities().stream().findFirst().orElseThrow().getAuthority();
-        if(role.equals("ROLE_TEACHER") || role.equals("ROLE_HOD")) {
+        if(role.equals("ROLE_TEACHER") || role.equals("ROLE_HOD") || role.equals("ROLE_ADMIN")) {
             Teacher teacher = teacherService.getTeacherByEmail(email);
             return ResponseEntity.ok(new UserDTO().toDTO(teacher));
         }
-        else if(role.equals("ROLE_ADMIN")) {
-            //admin is not stored in db
-            return ResponseEntity.ok(UserDTO.builder()
-                    .email(email)
-                    .role("ADMIN")
-                    .name("Admin")
-                    .id(0L)
-                    .isEmailVerified(true)
-                    .build());
-        }
         return ResponseEntity.badRequest().body("No user logged in");
+    }
+
+    @PostMapping("/register-as-admin")
+    public ResponseEntity<String> registerAdmin(@RequestBody AdminRequestDTO adminRequestDTO) {
+        return authService.registerInitialAdmin(adminRequestDTO);
     }
 }

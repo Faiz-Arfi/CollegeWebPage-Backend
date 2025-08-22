@@ -1,9 +1,6 @@
 package com.example.utkarshbackend.services;
 
-import com.example.utkarshbackend.dto.AuthUser;
-import com.example.utkarshbackend.dto.LoginRequestDTO;
-import com.example.utkarshbackend.dto.LoginResponseDTO;
-import com.example.utkarshbackend.dto.UserDTO;
+import com.example.utkarshbackend.dto.*;
 import com.example.utkarshbackend.entity.Teacher;
 import com.example.utkarshbackend.jwt.JwtService;
 import com.example.utkarshbackend.repository.TeacherRepo;
@@ -47,38 +44,10 @@ public class AuthService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email or Password are Required");
         }
 
-        Authentication authentication;
-        if(loginRequestDTO.getEmail().equals(adminEmail)) {
-            System.out.println("Admin login");
-            System.out.println(adminPassword);
-            System.out.println(encodePassword(adminPassword));
-            authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginRequestDTO.getEmail(), loginRequestDTO.getPassword())
-            );
-
-            if(authentication.isAuthenticated()) {
-                AuthUser authUser = AuthUser.builder()
-                        .id(0L)
-                        .role("ADMIN")
-                        .email(adminEmail)
-                        .build();
-                return LoginResponseDTO.builder()
-                        .accessToken(jwtService.generateToken(authUser, Integer.parseInt(accessTokenValidityTime)))
-                        .user(UserDTO.builder()
-                                .id(0L)
-                                .email(adminEmail)
-                                .name("Admin")
-                                .role("ADMIN")
-                                .isEmailVerified(true)
-                                .build())
-                        .build();
-            }
-        }
-
         try {
             Teacher teacher = teacherRepo.findByEmail(loginRequestDTO.getEmail()).orElse(null);
             if(teacher != null) {
-                authentication = authenticationManager.authenticate(
+                Authentication authentication = authenticationManager.authenticate(
                         new UsernamePasswordAuthenticationToken(loginRequestDTO.getEmail(), loginRequestDTO.getPassword())
                 );
 
@@ -124,5 +93,31 @@ public class AuthService {
 
     public String encodePassword(String password) {
         return passwordEncoder.encode(password);
+    }
+
+    public ResponseEntity<String> registerInitialAdmin(AdminRequestDTO adminRequestDTO) {
+        //check if admin already exists
+        Teacher teacher = teacherRepo.findByEmail(adminEmail).orElse(null);
+        if(teacher != null) {
+            return ResponseEntity.badRequest().body("Admin already exists");
+        }
+        //check if email is valid
+        if(!adminRequestDTO.getEmail().equalsIgnoreCase(adminEmail)) {
+            return ResponseEntity.badRequest().body("Invalid email");
+        }
+        //check if password is valid
+        if(!adminRequestDTO.getPassword().equals(adminPassword)) {
+            return ResponseEntity.badRequest().body("Invalid password");
+        }
+        else {
+            teacher = Teacher.builder()
+                    .email(adminEmail)
+                    .password(encodePassword(adminRequestDTO.getNewPassword()))
+                    .name("Admin")
+                    .role("ADMIN")
+                    .build();
+        }
+        Teacher saved = teacherRepo.save(teacher);
+        return ResponseEntity.ok().body("Admin Registered Successfully");
     }
 }
