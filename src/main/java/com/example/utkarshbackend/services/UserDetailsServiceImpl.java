@@ -28,7 +28,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-
         if(email.equalsIgnoreCase(adminEmail)) {
             return User.withUsername(adminEmail)
                     .password(adminPassword)
