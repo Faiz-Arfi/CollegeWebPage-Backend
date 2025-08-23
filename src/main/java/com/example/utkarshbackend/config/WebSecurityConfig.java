@@ -45,9 +45,9 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**", "/error/**").permitAll()
                         .requestMatchers("/student/**").authenticated()
-                        .requestMatchers("/teacher/**").hasRole("TEACHER")
-                        .requestMatchers("/hod/**").hasAnyRole("HOD", "TEACHER")
-                        .requestMatchers("/admin/**").hasAnyRole("ADMIN", "HOD", "TEACHER")
+                        .requestMatchers("/teacher/**").hasAnyRole("ADMIN","HOD","TEACHER")
+                        .requestMatchers("/hod/**").hasAnyRole("HOD", "ADMIN")
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
