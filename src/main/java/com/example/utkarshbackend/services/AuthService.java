@@ -97,17 +97,17 @@ public class AuthService {
 
     public ResponseEntity<String> registerInitialAdmin(AdminRequestDTO adminRequestDTO) {
         //check if admin already exists
-        Teacher teacher = teacherRepo.findByEmail(adminEmail).orElse(null);
-        if(teacher != null) {
-            return ResponseEntity.badRequest().body("Admin already exists");
-        }
         //check if email is valid
         if(!adminRequestDTO.getEmail().equalsIgnoreCase(adminEmail)) {
-            return ResponseEntity.badRequest().body("Invalid email");
+            return ResponseEntity.badRequest().body("Please use admin email");
         }
+        Teacher teacher = teacherRepo.findByEmail(adminEmail).orElse(null);
         //check if password is valid
-        if(!adminRequestDTO.getPassword().equals(adminPassword)) {
-            return ResponseEntity.badRequest().body("Invalid password");
+        if(teacher == null && !adminRequestDTO.getPassword().equals(adminPassword)) {
+            return ResponseEntity.badRequest().body("Please use admin password");
+        }
+        if(teacher != null) {
+            return ResponseEntity.badRequest().body("Admin already exists");
         }
         else {
             teacher = Teacher.builder()
