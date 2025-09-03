@@ -2,6 +2,7 @@ package com.example.utkarshbackend.services;
 
 import com.example.utkarshbackend.dto.TeacherDetailsDTO;
 import com.example.utkarshbackend.dto.TeacherRegReqDTO;
+import com.example.utkarshbackend.entity.Department;
 import com.example.utkarshbackend.entity.Teacher;
 import com.example.utkarshbackend.repository.TeacherRepo;
 import org.springframework.data.domain.Page;
@@ -36,12 +37,15 @@ public class HODService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already exists");
         }
 
+        //To do : fetch department from db and set it to teacher
+        Department dept = null;
+
         Teacher teacher = Teacher.builder()
                 .name(teacherRegReqDTO.getName())
                 .email(teacherRegReqDTO.getEmail())
                 .password(passwordEncoder.encode(teacherRegReqDTO.getPassword()))
                 .profilePic(teacherRegReqDTO.getProfilePic())
-                .department(teacherRegReqDTO.getDepartment())
+                .department(dept)
                 .designation(teacherRegReqDTO.getDesignation())
                 .education(teacherRegReqDTO.getEducation())
                 .phone(teacherRegReqDTO.getPhone())
@@ -54,7 +58,8 @@ public class HODService {
                 .name(savedTeacher.getName())
                 .email(savedTeacher.getEmail())
                 .profilePic(savedTeacher.getProfilePic())
-                .department(savedTeacher.getDepartment())
+                .departmentCode(savedTeacher.getDepartment().getCode())
+                .departmentName(savedTeacher.getDepartment().getName())
                 .designation(savedTeacher.getDesignation())
                 .phone(savedTeacher.getPhone())
                 .education(savedTeacher.getEducation())
@@ -71,7 +76,8 @@ public class HODService {
                 .name(teacher.getName())
                 .email(teacher.getEmail())
                 .profilePic(teacher.getProfilePic())
-                .department(teacher.getDepartment())
+                .departmentName(teacher.getDepartment().getName())
+                .departmentCode(teacher.getDepartment().getCode())
                 .designation(teacher.getDesignation())
                 .phone(teacher.getPhone())
                 .education(teacher.getEducation())
