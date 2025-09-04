@@ -1,8 +1,11 @@
 package com.example.utkarshbackend.services;
 
 import com.example.utkarshbackend.dto.*;
+import com.example.utkarshbackend.entity.Admin;
+import com.example.utkarshbackend.entity.Department;
 import com.example.utkarshbackend.entity.Teacher;
 import com.example.utkarshbackend.jwt.JwtService;
+import com.example.utkarshbackend.repository.AdminRepo;
 import com.example.utkarshbackend.repository.TeacherRepo;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -30,12 +33,14 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final TeacherRepo teacherRepo;
+    private final AdminRepo adminRepo;
     private final PasswordEncoder passwordEncoder;
 
-    public AuthService(AuthenticationManager authenticationManager, JwtService jwtService, TeacherRepo teacherRepo, PasswordEncoder passwordEncoder) {
+    public AuthService(AuthenticationManager authenticationManager, JwtService jwtService, TeacherRepo teacherRepo, AdminRepo adminRepo, PasswordEncoder passwordEncoder) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.teacherRepo = teacherRepo;
+        this.adminRepo = adminRepo;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -45,6 +50,10 @@ public class AuthService {
         }
 
         try {
+            Admin admin = adminRepo.findByEmail(loginRequestDTO.getEmail()).orElse(null);
+            if(admin != null) {
+                return loginAsAdmin(loginRequestDTO, admin);
+            }
             Teacher teacher = teacherRepo.findByEmail(loginRequestDTO.getEmail()).orElse(null);
             if(teacher != null) {
                 Authentication authentication = authenticationManager.authenticate(
@@ -77,6 +86,25 @@ public class AuthService {
         return null;
     }
 
+    private LoginResponseDTO loginAsAdmin(LoginRequestDTO loginRequestDTO, Admin admin) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequestDTO.getEmail(), loginRequestDTO.getPassword())
+        );
+
+        if (authentication.isAuthenticated()) {
+            AuthUser authUser = AuthUser.builder()
+                    .id(admin.getId())
+                    .email(admin.getEmail())
+                    .role(admin.getRole())
+                    .build();
+            return LoginResponseDTO.builder()
+                    .accessToken(jwtService.generateToken(authUser, Integer.parseInt(accessTokenValidityTime)))
+                    .user(new UserDTO().toDTO(admin))
+                    .build();
+        }
+        return null;
+    }
+
     public ResponseEntity<String> logout() {
         ResponseCookie responseCookie = ResponseCookie.from("JWT", "")
                 .httpOnly(true)
@@ -101,23 +129,23 @@ public class AuthService {
         if(!adminRequestDTO.getEmail().equalsIgnoreCase(adminEmail)) {
             return ResponseEntity.badRequest().body("Please use admin email");
         }
-        Teacher teacher = teacherRepo.findByEmail(adminEmail).orElse(null);
+        Admin admin = adminRepo.findByEmail(adminEmail).orElse(null);
         //check if password is valid
-        if(teacher == null && !adminRequestDTO.getPassword().equals(adminPassword)) {
+        if(admin == null && !adminRequestDTO.getPassword().equals(adminPassword)) {
             return ResponseEntity.badRequest().body("Please use admin password");
         }
-        if(teacher != null) {
+        if(admin != null) {
             return ResponseEntity.badRequest().body("Admin already exists");
         }
         else {
-            teacher = Teacher.builder()
+            admin = Admin.builder()
                     .email(adminEmail)
                     .password(encodePassword(adminRequestDTO.getNewPassword()))
                     .name("Admin")
                     .role("ADMIN")
                     .build();
         }
-        Teacher saved = teacherRepo.save(teacher);
+        Admin saved = adminRepo.save(admin);
         return ResponseEntity.ok().body("Admin Registered Successfully");
     }
 }
