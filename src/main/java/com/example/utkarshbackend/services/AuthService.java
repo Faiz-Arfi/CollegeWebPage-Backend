@@ -6,6 +6,7 @@ import com.example.utkarshbackend.entity.Department;
 import com.example.utkarshbackend.entity.Student;
 import com.example.utkarshbackend.entity.Teacher;
 import com.example.utkarshbackend.jwt.JwtService;
+import com.example.utkarshbackend.mapper.UserMapper;
 import com.example.utkarshbackend.repository.AdminRepo;
 import com.example.utkarshbackend.repository.DepartmentRepo;
 import com.example.utkarshbackend.repository.StudentRepo;
@@ -77,7 +78,7 @@ public class AuthService {
                             .build();
                     return LoginResponseDTO.builder()
                             .accessToken(jwtService.generateToken(authUser, Integer.parseInt(accessTokenValidityTime)))
-                            .user(new UserDTO().toDTO(teacher))
+                            .user(UserMapper.toDTO(teacher))
                             .build();
                 }
 
@@ -115,7 +116,7 @@ public class AuthService {
                     .build();
             return LoginResponseDTO.builder()
                     .accessToken(jwtService.generateToken(authUser, Integer.parseInt(accessTokenValidityTime)))
-                    .user(new UserDTO().toDTO(student))
+                    .user(UserMapper.toDTO(student))
                     .build();
         }
         return null;
@@ -134,7 +135,7 @@ public class AuthService {
                     .build();
             return LoginResponseDTO.builder()
                     .accessToken(jwtService.generateToken(authUser, Integer.parseInt(accessTokenValidityTime)))
-                    .user(new UserDTO().toDTO(admin))
+                    .user(UserMapper.toDTO(admin))
                     .build();
         }
         return null;
@@ -237,6 +238,28 @@ public class AuthService {
         saved.setVerificationToken(jwtService.generateToken(authUser, Integer.parseInt(emailVerificationTokenValidityTime)));
         //TO-DO: send an email verification link
         studentRepo.save(saved);
-        return new UserDTO().toDTO(saved);
+        return UserMapper.toDTO(saved);
+    }
+
+    public Object getLoggedInUser(Authentication authentication) {
+        String email = authentication.getName();
+        String role = authentication.getAuthorities().stream().findFirst().orElseThrow().getAuthority();
+        switch (role) {
+            case "ROLE_TEACHER", "ROLE_HOD" -> {
+                Teacher teacher = teacherRepo.findByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Teacher not found"));
+                return ResponseEntity.ok(UserMapper.toDTO(teacher));
+            }
+            case "ROLE_ADMIN" -> {
+                Admin admin = adminRepo.findByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "not found"));
+                return ResponseEntity.ok(UserMapper.toDTO(admin));
+            }
+            case "ROLE_STUDENT" -> {
+                Student student = studentRepo.findByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
+                return ResponseEntity.ok(UserMapper.toDTO(student));
+            }
+            default -> {
+                return null;
+            }
+        }
     }
 }

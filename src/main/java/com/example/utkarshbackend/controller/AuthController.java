@@ -1,11 +1,7 @@
 package com.example.utkarshbackend.controller;
 
 import com.example.utkarshbackend.dto.*;
-import com.example.utkarshbackend.entity.Admin;
-import com.example.utkarshbackend.entity.Teacher;
-import com.example.utkarshbackend.repository.AdminRepo;
 import com.example.utkarshbackend.services.AuthService;
-import com.example.utkarshbackend.services.TeacherService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -18,13 +14,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class AuthController {
 
     private final AuthService authService;
-    private final TeacherService teacherService;
-    private final AdminRepo adminRepo;
 
-    public AuthController(AuthService authService, TeacherService teacherService, AdminRepo adminRepo) {
+    public AuthController(AuthService authService) {
         this.authService = authService;
-        this.teacherService = teacherService;
-        this.adminRepo = adminRepo;
     }
 
     @PostMapping("/login")
@@ -53,19 +45,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body("No user logged in");
         }
 
-        String email = authentication.getName();
-        String role = authentication.getAuthorities().stream().findFirst().orElseThrow().getAuthority();
-        if(role.equals("ROLE_TEACHER") || role.equals("ROLE_HOD")) {
-            Teacher teacher = teacherService.getTeacherByEmail(email);
-            return ResponseEntity.ok(new UserDTO().toDTO(teacher));
-        }
-        else if(role.equals("ROLE_ADMIN")) {
-            Admin admin = adminRepo.findByEmail(email).orElse(null);
-            if(admin != null) {
-                return ResponseEntity.ok(new UserDTO().toDTO(admin));
-            }
-        }
-        return ResponseEntity.badRequest().body("No user logged in");
+        return ResponseEntity.ok().body(authService.getLoggedInUser(authentication));
     }
 
     @PostMapping("/register-as-admin")
