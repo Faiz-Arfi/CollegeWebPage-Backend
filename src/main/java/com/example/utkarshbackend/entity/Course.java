@@ -16,6 +16,8 @@ import java.util.List;
 @Builder
 public class Course {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private String code;
     private String name;
     private String description;
