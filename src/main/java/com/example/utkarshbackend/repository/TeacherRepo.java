@@ -1,6 +1,5 @@
 package com.example.utkarshbackend.repository;
 
-import com.example.utkarshbackend.dto.TeacherDetailsDTO;
 import com.example.utkarshbackend.entity.Teacher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
