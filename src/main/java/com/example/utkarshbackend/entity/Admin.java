@@ -20,6 +20,7 @@ public class Admin {
     private Long id;
     private String name;
     private String email;
+    private boolean isEmailVerified;
     private String password;
     private String role;
 }

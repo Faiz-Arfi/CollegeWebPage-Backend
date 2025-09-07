@@ -24,6 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+@SuppressWarnings("DuplicatedCode")
 @Service
 public class AuthService {
 
@@ -71,11 +72,7 @@ public class AuthService {
                 );
 
                 if (authentication.isAuthenticated()) {
-                    AuthUser authUser = AuthUser.builder()
-                            .id(teacher.getId())
-                            .email(teacher.getEmail())
-                            .role(teacher.getRole())
-                            .build();
+                    AuthUser authUser = UserMapper.toAuthUser(teacher);
                     return LoginResponseDTO.builder()
                             .accessToken(jwtService.generateToken(authUser, Integer.parseInt(accessTokenValidityTime)))
                             .user(UserMapper.toDTO(teacher))
@@ -109,11 +106,7 @@ public class AuthService {
         );
 
         if (authentication.isAuthenticated()) {
-            AuthUser authUser = AuthUser.builder()
-                    .id(student.getId())
-                    .email(student.getEmail())
-                    .role(student.getRole())
-                    .build();
+            AuthUser authUser = UserMapper.toAuthUser(student);
             return LoginResponseDTO.builder()
                     .accessToken(jwtService.generateToken(authUser, Integer.parseInt(accessTokenValidityTime)))
                     .user(UserMapper.toDTO(student))
@@ -128,11 +121,7 @@ public class AuthService {
         );
 
         if (authentication.isAuthenticated()) {
-            AuthUser authUser = AuthUser.builder()
-                    .id(admin.getId())
-                    .email(admin.getEmail())
-                    .role(admin.getRole())
-                    .build();
+            AuthUser authUser = UserMapper.toAuthUser(admin);
             return LoginResponseDTO.builder()
                     .accessToken(jwtService.generateToken(authUser, Integer.parseInt(accessTokenValidityTime)))
                     .user(UserMapper.toDTO(admin))
@@ -179,9 +168,10 @@ public class AuthService {
                     .password(encodePassword(adminRequestDTO.getNewPassword()))
                     .name("Admin")
                     .role("ADMIN")
+                    .isEmailVerified(true)
                     .build();
         }
-        Admin saved = adminRepo.save(admin);
+        adminRepo.save(admin);
         return ResponseEntity.ok().body("Admin Registered Successfully");
     }
 
@@ -229,11 +219,7 @@ public class AuthService {
         student.setRole("STUDENT");
         Student saved = studentRepo.save(student);
 
-        AuthUser authUser = AuthUser.builder()
-                .id(saved.getId())
-                .email(saved.getEmail())
-                .role(saved.getRole())
-                .build();
+        AuthUser authUser = UserMapper.toAuthUser(saved);
 
         saved.setVerificationToken(jwtService.generateToken(authUser, Integer.parseInt(emailVerificationTokenValidityTime)));
         //TO-DO: send an email verification link
