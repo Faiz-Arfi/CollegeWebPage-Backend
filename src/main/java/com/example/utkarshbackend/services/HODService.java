@@ -1,9 +1,12 @@
 package com.example.utkarshbackend.services;
 
+import com.example.utkarshbackend.dto.DepartmentDTO;
 import com.example.utkarshbackend.dto.TeacherDetailsDTO;
 import com.example.utkarshbackend.dto.TeacherRegReqDTO;
 import com.example.utkarshbackend.entity.Department;
 import com.example.utkarshbackend.entity.Teacher;
+import com.example.utkarshbackend.mapper.DepartmentMapper;
+import com.example.utkarshbackend.repository.DepartmentRepo;
 import com.example.utkarshbackend.repository.TeacherRepo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,10 +20,12 @@ import org.springframework.web.server.ResponseStatusException;
 public class HODService {
 
     private final TeacherRepo teacherRepo;
+    private final DepartmentRepo departmentRepo;
     private final PasswordEncoder passwordEncoder;
 
-    public HODService(TeacherRepo teacherRepo, PasswordEncoder passwordEncoder) {
+    public HODService(TeacherRepo teacherRepo, DepartmentRepo departmentRepo, PasswordEncoder passwordEncoder) {
         this.teacherRepo = teacherRepo;
+        this.departmentRepo = departmentRepo;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -82,5 +87,20 @@ public class HODService {
                 .phone(teacher.getPhone())
                 .education(teacher.getEducation())
                 .build());
+    }
+
+    public DepartmentDTO editDepartment(Department dept) {
+        Department existing = departmentRepo.findById(dept.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found"));
+        if(dept.getCode() != null && !dept.getCode().isBlank()) {
+            existing.setCode(dept.getCode());
+        }
+        if(dept.getName() != null && !dept.getName().isBlank()) {
+            existing.setName(dept.getName());
+        }
+        if(dept.getDescription() != null && !dept.getDescription().isBlank()) {
+            existing.setDescription(dept.getDescription());
+        }
+        Department saved = departmentRepo.save(existing);
+        return DepartmentMapper.toDTO(saved);
     }
 }
