@@ -8,6 +8,7 @@ import com.example.utkarshbackend.services.HODService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -31,8 +32,8 @@ public class HODController {
     }
 
     @PutMapping("/dept")
-    public ResponseEntity<DepartmentDTO> editDepartment (@RequestBody Department dept) {
-        return ResponseEntity.ok(hodService.editDepartment(dept));
+    public ResponseEntity<DepartmentDTO> editDepartment (@RequestBody Department dept, Authentication authentication) {
+        return ResponseEntity.ok(hodService.editDepartment(dept, authentication));
     }
 
 }

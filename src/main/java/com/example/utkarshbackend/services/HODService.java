@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -43,8 +44,7 @@ public class HODService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already exists");
         }
 
-        //To do : fetch department from db and set it to teacher
-        Department dept = null;
+        Department dept = departmentRepo.findById(teacherRegReqDTO.getDepartmentId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Department not found"));
 
         Teacher teacher = Teacher.builder()
                 .name(teacherRegReqDTO.getName())
@@ -70,8 +70,18 @@ public class HODService {
         return teacherPage.map(TeacherMapper::toDTO);
     }
 
-    public DepartmentDTO editDepartment(Department dept) {
+    public DepartmentDTO editDepartment(Department dept, Authentication authentication) {
         Department existing = departmentRepo.findById(dept.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found"));
+
+        //Find a teacher using authentication email
+        String email = authentication.getName();
+        Teacher teacher = teacherRepo.findByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Teacher not found"));
+
+        //check if the department belongs to the hod
+        if(!teacher.getDepartment().getId().equals(existing.getId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You are not authorized to edit this department");
+        }
+
         if(dept.getCode() != null && !dept.getCode().isBlank()) {
             existing.setCode(dept.getCode());
         }
