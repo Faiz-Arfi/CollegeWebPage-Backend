@@ -6,6 +6,7 @@ import com.example.utkarshbackend.dto.TeacherRegReqDTO;
 import com.example.utkarshbackend.entity.Department;
 import com.example.utkarshbackend.entity.Teacher;
 import com.example.utkarshbackend.mapper.DepartmentMapper;
+import com.example.utkarshbackend.mapper.TeacherMapper;
 import com.example.utkarshbackend.repository.DepartmentRepo;
 import com.example.utkarshbackend.repository.TeacherRepo;
 import org.springframework.data.domain.Page;
@@ -58,17 +59,7 @@ public class HODService {
                 .build();
         Teacher savedTeacher = teacherRepo.save(teacher);
 
-        TeacherDetailsDTO dto = TeacherDetailsDTO.builder()
-                .id(savedTeacher.getId())
-                .name(savedTeacher.getName())
-                .email(savedTeacher.getEmail())
-                .profilePic(savedTeacher.getProfilePic())
-                .departmentCode(savedTeacher.getDepartment().getCode())
-                .departmentName(savedTeacher.getDepartment().getName())
-                .designation(savedTeacher.getDesignation())
-                .phone(savedTeacher.getPhone())
-                .education(savedTeacher.getEducation())
-                .build();
+        TeacherDetailsDTO dto = TeacherMapper.toDTO(savedTeacher);
 
         return ResponseEntity.ok().body(dto);
     }
@@ -76,17 +67,7 @@ public class HODService {
     public Page<TeacherDetailsDTO> getAllTeachersRoles(Pageable p) {
         Page<Teacher> teacherPage = teacherRepo.findAllByRole("TEACHER", p);
 
-        return teacherPage.map(teacher -> TeacherDetailsDTO.builder()
-                .id(teacher.getId())
-                .name(teacher.getName())
-                .email(teacher.getEmail())
-                .profilePic(teacher.getProfilePic())
-                .departmentName(teacher.getDepartment().getName())
-                .departmentCode(teacher.getDepartment().getCode())
-                .designation(teacher.getDesignation())
-                .phone(teacher.getPhone())
-                .education(teacher.getEducation())
-                .build());
+        return teacherPage.map(TeacherMapper::toDTO);
     }
 
     public DepartmentDTO editDepartment(Department dept) {
