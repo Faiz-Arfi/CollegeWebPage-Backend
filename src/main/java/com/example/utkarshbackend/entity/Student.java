@@ -16,6 +16,9 @@ import java.util.List;
 public class Student {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(unique = true)
     private String regNo;
     private String rollNo;
     private String password;
@@ -28,7 +31,9 @@ public class Student {
     private String dob;
     private String admissionYear;
     private String admissionStatus;
+    private String role;
     private boolean isEmailVerified;
+    private String verificationToken;
 
     @ManyToOne
     @JoinColumn(name = "department_id")

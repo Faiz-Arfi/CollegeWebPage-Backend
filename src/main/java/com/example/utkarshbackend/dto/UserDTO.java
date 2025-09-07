@@ -1,6 +1,7 @@
 package com.example.utkarshbackend.dto;
 
 import com.example.utkarshbackend.entity.Admin;
+import com.example.utkarshbackend.entity.Student;
 import com.example.utkarshbackend.entity.Teacher;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,6 +38,15 @@ public class UserDTO {
     }
 
     public UserDTO toDTO(Admin user) {
+        return UserDTO.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .name(user.getName())
+                .role(user.getRole())
+                .build();
+    }
+
+    public UserDTO toDTO(Student user) {
         return UserDTO.builder()
                 .id(user.getId())
                 .email(user.getEmail())

@@ -1,9 +1,6 @@
 package com.example.utkarshbackend.controller;
 
-import com.example.utkarshbackend.dto.AdminRequestDTO;
-import com.example.utkarshbackend.dto.LoginRequestDTO;
-import com.example.utkarshbackend.dto.LoginResponseDTO;
-import com.example.utkarshbackend.dto.UserDTO;
+import com.example.utkarshbackend.dto.*;
 import com.example.utkarshbackend.entity.Admin;
 import com.example.utkarshbackend.entity.Teacher;
 import com.example.utkarshbackend.repository.AdminRepo;
@@ -14,6 +11,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 @RequestMapping("/auth")
@@ -73,5 +71,12 @@ public class AuthController {
     @PostMapping("/register-as-admin")
     public ResponseEntity<String> registerAdmin(@RequestBody AdminRequestDTO adminRequestDTO) {
         return authService.registerInitialAdmin(adminRequestDTO);
+    }
+
+    @PostMapping("/reg-student")
+    public ResponseEntity<UserDTO> studentRegistration(@RequestBody StudentRegRequestDTO studentRegRequestDTO, UriComponentsBuilder uriComponentsBuilder) {
+        UserDTO student = authService.registerStudent(studentRegRequestDTO);
+        var location = uriComponentsBuilder.path("/auth/get-current-user").build().toUri();
+        return ResponseEntity.created(location).body(student);
     }
 }

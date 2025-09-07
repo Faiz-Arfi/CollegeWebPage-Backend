@@ -3,9 +3,12 @@ package com.example.utkarshbackend.services;
 import com.example.utkarshbackend.dto.*;
 import com.example.utkarshbackend.entity.Admin;
 import com.example.utkarshbackend.entity.Department;
+import com.example.utkarshbackend.entity.Student;
 import com.example.utkarshbackend.entity.Teacher;
 import com.example.utkarshbackend.jwt.JwtService;
 import com.example.utkarshbackend.repository.AdminRepo;
+import com.example.utkarshbackend.repository.DepartmentRepo;
+import com.example.utkarshbackend.repository.StudentRepo;
 import com.example.utkarshbackend.repository.TeacherRepo;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -29,18 +32,24 @@ public class AuthService {
     private String adminPassword;
     @Value("${jwt.access-token-validity-time}")
     private String accessTokenValidityTime;
+    @Value("${email.verification.validity-time}")
+    private String emailVerificationTokenValidityTime;
 
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final TeacherRepo teacherRepo;
     private final AdminRepo adminRepo;
+    private final StudentRepo studentRepo;
+    private final DepartmentRepo departmentRepo;
     private final PasswordEncoder passwordEncoder;
 
-    public AuthService(AuthenticationManager authenticationManager, JwtService jwtService, TeacherRepo teacherRepo, AdminRepo adminRepo, PasswordEncoder passwordEncoder) {
+    public AuthService(AuthenticationManager authenticationManager, JwtService jwtService, TeacherRepo teacherRepo, AdminRepo adminRepo, StudentRepo studentRepo, DepartmentRepo departmentRepo, PasswordEncoder passwordEncoder) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.teacherRepo = teacherRepo;
         this.adminRepo = adminRepo;
+        this.studentRepo = studentRepo;
+        this.departmentRepo = departmentRepo;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -73,6 +82,10 @@ public class AuthService {
                 }
 
             }
+            Student student = studentRepo.findByEmail(loginRequestDTO.getEmail()).orElse(null);
+            if(student != null) {
+                return loginAsStudent(loginRequestDTO, student);
+            }
             else {
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
             }
@@ -82,6 +95,28 @@ public class AuthService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred while logging in");
+        }
+    }
+
+    private LoginResponseDTO loginAsStudent(LoginRequestDTO loginRequestDTO, Student student) {
+        if(!student.isEmailVerified()) {
+            //To-DO: send an email verification link
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Please verify your email");
+        }
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequestDTO.getEmail(), loginRequestDTO.getPassword())
+        );
+
+        if (authentication.isAuthenticated()) {
+            AuthUser authUser = AuthUser.builder()
+                    .id(student.getId())
+                    .email(student.getEmail())
+                    .role(student.getRole())
+                    .build();
+            return LoginResponseDTO.builder()
+                    .accessToken(jwtService.generateToken(authUser, Integer.parseInt(accessTokenValidityTime)))
+                    .user(new UserDTO().toDTO(student))
+                    .build();
         }
         return null;
     }
@@ -130,7 +165,7 @@ public class AuthService {
             return ResponseEntity.badRequest().body("Please use admin email");
         }
         Admin admin = adminRepo.findByEmail(adminEmail).orElse(null);
-        //check if password is valid
+        //check if the password is valid
         if(admin == null && !adminRequestDTO.getPassword().equals(adminPassword)) {
             return ResponseEntity.badRequest().body("Please use admin password");
         }
@@ -147,5 +182,61 @@ public class AuthService {
         }
         Admin saved = adminRepo.save(admin);
         return ResponseEntity.ok().body("Admin Registered Successfully");
+    }
+
+    public UserDTO registerStudent(StudentRegRequestDTO studentRegRequestDTO) {
+        Student student = studentRepo.findByEmail(studentRegRequestDTO.getEmail()).orElse(null);
+        //check if email is already register or not
+        if (student != null) {
+            if (student.isEmailVerified()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already registered");
+            }
+        }
+        //check if the registration number already exists in db or not
+        if(studentRepo.existsByRegNo(studentRegRequestDTO.getRegNo())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Registration number already registered");
+        }
+        //check if the password is valid
+        if(studentRegRequestDTO.getPassword().isBlank() || studentRegRequestDTO.getPassword().length() < 8) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password must be at least 8 characters long");
+        }
+        //check for strong password
+        else if(!studentRegRequestDTO.getPassword().matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password must contain at least one lowercase letter, one uppercase letter, and one number");
+        }
+        else if(!studentRegRequestDTO.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid email format");
+        }
+        else if(studentRegRequestDTO.getName().length() < 3) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username must be at least 3 characters");
+        }
+        else if(studentRegRequestDTO.getName().length() > 15) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username must be at most 15 characters");
+        }
+
+        if(student == null) {
+            student = new Student();
+            student.setEmail(studentRegRequestDTO.getEmail());
+        }
+
+        Department dept = departmentRepo.findById(studentRegRequestDTO.getDepartmentId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Department not found"));
+        student.setName(studentRegRequestDTO.getName());
+        student.setPassword(encodePassword(studentRegRequestDTO.getPassword()));
+        student.setRegNo(studentRegRequestDTO.getRegNo());
+        student.setDepartment(dept);
+        student.setEmailVerified(false);
+        student.setRole("STUDENT");
+        Student saved = studentRepo.save(student);
+
+        AuthUser authUser = AuthUser.builder()
+                .id(saved.getId())
+                .email(saved.getEmail())
+                .role(saved.getRole())
+                .build();
+
+        saved.setVerificationToken(jwtService.generateToken(authUser, Integer.parseInt(emailVerificationTokenValidityTime)));
+        //TO-DO: send an email verification link
+        studentRepo.save(saved);
+        return new UserDTO().toDTO(saved);
     }
 }
