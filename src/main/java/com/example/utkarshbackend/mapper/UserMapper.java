@@ -15,6 +15,7 @@ public class UserMapper {
                 .email(user.getEmail())
                 .name(user.getName())
                 .role(user.getRole())
+                .isEmailVerified(user.isEmailVerified())
                 .build();
     }
 
@@ -24,6 +25,7 @@ public class UserMapper {
                 .email(user.getEmail())
                 .name(user.getName())
                 .role(user.getRole())
+                .isEmailVerified(user.isEmailVerified())
                 .build();
     }
 
@@ -33,6 +35,7 @@ public class UserMapper {
                 .email(user.getEmail())
                 .name(user.getName())
                 .role(user.getRole())
+                .isEmailVerified(user.isEmailVerified())
                 .build();
     }
 

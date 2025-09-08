@@ -23,6 +23,8 @@ public class Teacher {
     private String name;
     private String profilePic;
     private String email;
+    private boolean isEmailVerified;
+    private String verificationToken;
     private String password;
     private String role;
     private String designation;
