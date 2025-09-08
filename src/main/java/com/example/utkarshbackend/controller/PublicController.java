@@ -22,7 +22,7 @@ public class PublicController {
         this.publicService = publicService;
     }
 
-    @GetMapping("/departments")
+    @GetMapping("/department")
     public ResponseEntity<Page<DepartmentDTO>> getAllDepartments(Pageable p) {
         return ResponseEntity.ok(publicService.getAllDepartment(p));
     }
@@ -32,7 +32,7 @@ public class PublicController {
         return ResponseEntity.ok(publicService.getDepartmentById(id));
     }
 
-    @GetMapping("/courses")
+    @GetMapping("/course")
     public ResponseEntity<Page<CourseDTO>> getAllCourses(Pageable p) {
         return ResponseEntity.ok(publicService.getAllCourse(p));
     }
@@ -42,7 +42,7 @@ public class PublicController {
         return ResponseEntity.ok(publicService.getCourseById(id));
     }
 
-    @GetMapping("/teachers")
+    @GetMapping("/teacher")
     public ResponseEntity<Page<TeacherDetailsDTO>> getAllTeachers(Pageable p) {
         return ResponseEntity.ok(publicService.getAllTeacher(p));
     }

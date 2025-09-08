@@ -31,9 +31,9 @@ public class HODController {
         return hodService.registerNewTeacher(teacherRegReqDTO);
     }
 
-    @PutMapping("/dept")
-    public ResponseEntity<DepartmentDTO> editDepartment (@RequestBody Department dept, Authentication authentication) {
-        return ResponseEntity.ok(hodService.editDepartment(dept, authentication));
+    @PutMapping("/dept/{deptId}")
+    public ResponseEntity<DepartmentDTO> editDepartment (@RequestBody Department dept, Authentication authentication, @PathVariable Long deptId) {
+        return ResponseEntity.ok(hodService.editDepartment(dept, deptId, authentication));
     }
 
 }

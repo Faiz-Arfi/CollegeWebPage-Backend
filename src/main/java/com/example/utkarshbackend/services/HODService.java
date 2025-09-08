@@ -70,16 +70,19 @@ public class HODService {
         return teacherPage.map(TeacherMapper::toDTO);
     }
 
-    public DepartmentDTO editDepartment(Department dept, Authentication authentication) {
-        Department existing = departmentRepo.findById(dept.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found"));
+    public DepartmentDTO editDepartment(Department dept, Long deptId, Authentication authentication) {
+        Department existing = departmentRepo.findById(deptId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found"));
 
-        //Find a teacher using authentication email
-        String email = authentication.getName();
-        Teacher teacher = teacherRepo.findByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Teacher not found"));
+        //check if the user is not admin
+        if(!authentication.getAuthorities().stream().findFirst().orElseThrow().getAuthority().equalsIgnoreCase("ROLE_ADMIN")) {
+            //Find a teacher using authentication email
+            String email = authentication.getName();
+            Teacher teacher = teacherRepo.findByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Teacher not found"));
 
-        //check if the department belongs to the hod
-        if(!teacher.getDepartment().getId().equals(existing.getId())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You are not authorized to edit this department");
+            //check if the department belongs to the hod
+            if(!teacher.getDepartment().getId().equals(existing.getId())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You are not authorized to edit this department");
+            }
         }
 
         if(dept.getCode() != null && !dept.getCode().isBlank()) {
