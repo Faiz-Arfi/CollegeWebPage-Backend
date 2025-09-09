@@ -58,17 +58,17 @@ public class HODController {
         return hodService.deleteNonTeacher(id);
     }
 
-    @GetMapping("/public-contactus")
+    @GetMapping("/public-contact-us")
     public Page<ContactPageData> getAllContactUsData(Pageable p) {
         return hodService.getAllContactUsData(p);
     }
 
-    @GetMapping("/public-contactus/{id}")
+    @GetMapping("/public-contact-us/{id}")
     public ContactPageData getContactUsDataById(@PathVariable Long id) {
         return hodService.getContactUsDataById(id);
     }
 
-    @DeleteMapping("/public-contactus")
+    @DeleteMapping("/public-contact-us/{id}")
     public ResponseEntity<ContactPageData> deleteContactUsDataById(@PathVariable Long id) {
         return hodService.deleteContactUsDataById(id);
     }
