@@ -3,6 +3,7 @@ package com.example.utkarshbackend.controller;
 import com.example.utkarshbackend.dto.CourseDTO;
 import com.example.utkarshbackend.dto.DepartmentDTO;
 import com.example.utkarshbackend.dto.TeacherDetailsDTO;
+import com.example.utkarshbackend.entity.NonTeaching;
 import com.example.utkarshbackend.services.PublicService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -50,5 +51,15 @@ public class PublicController {
     @GetMapping("/teacher/{id}")
     public ResponseEntity<TeacherDetailsDTO> getTeacherById(@PathVariable long id) {
         return ResponseEntity.ok(publicService.getTeacherById(id));
+    }
+
+    @GetMapping("/non-teaching")
+    public ResponseEntity<Page<NonTeaching>> getAllNonTeacher(Pageable p) {
+        return ResponseEntity.ok(publicService.getAllNonTeacher(p));
+    }
+
+    @GetMapping("/non-teaching/{id}")
+    public ResponseEntity<NonTeaching> getNonTeacherById(@PathVariable long id) {
+        return ResponseEntity.ok(publicService.getNonTeacherById(id));
     }
 }
