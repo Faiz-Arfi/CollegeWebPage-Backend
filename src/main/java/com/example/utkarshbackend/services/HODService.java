@@ -3,11 +3,13 @@ package com.example.utkarshbackend.services;
 import com.example.utkarshbackend.dto.DepartmentDTO;
 import com.example.utkarshbackend.dto.TeacherDetailsDTO;
 import com.example.utkarshbackend.dto.TeacherRegReqDTO;
+import com.example.utkarshbackend.entity.ContactPageData;
 import com.example.utkarshbackend.entity.Department;
 import com.example.utkarshbackend.entity.NonTeaching;
 import com.example.utkarshbackend.entity.Teacher;
 import com.example.utkarshbackend.mapper.DepartmentMapper;
 import com.example.utkarshbackend.mapper.TeacherMapper;
+import com.example.utkarshbackend.repository.ContactPageDataRepo;
 import com.example.utkarshbackend.repository.DepartmentRepo;
 import com.example.utkarshbackend.repository.NonTeachingRepo;
 import com.example.utkarshbackend.repository.TeacherRepo;
@@ -26,12 +28,14 @@ public class HODService {
     private final TeacherRepo teacherRepo;
     private final DepartmentRepo departmentRepo;
     private final NonTeachingRepo nonTeachingRepo;
+    private final ContactPageDataRepo contactPageDataRepo;
     private final PasswordEncoder passwordEncoder;
 
-    public HODService(TeacherRepo teacherRepo, DepartmentRepo departmentRepo, NonTeachingRepo nonTeachingRepo, PasswordEncoder passwordEncoder) {
+    public HODService(TeacherRepo teacherRepo, DepartmentRepo departmentRepo, NonTeachingRepo nonTeachingRepo, ContactPageDataRepo contactPageDataRepo, PasswordEncoder passwordEncoder) {
         this.teacherRepo = teacherRepo;
         this.departmentRepo = departmentRepo;
         this.nonTeachingRepo = nonTeachingRepo;
+        this.contactPageDataRepo = contactPageDataRepo;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -181,5 +185,19 @@ public class HODService {
         NonTeaching nonTeaching = nonTeachingRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Non Teaching Staff not found"));
         nonTeachingRepo.delete(nonTeaching);
         return ResponseEntity.ok(nonTeaching);
+    }
+
+    public Page<ContactPageData> getAllContactUsData(Pageable p) {
+        return contactPageDataRepo.findAll(p);
+    }
+
+    public ContactPageData getContactUsDataById(Long id) {
+        return contactPageDataRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contact Page Data not found"));
+    }
+
+    public ResponseEntity<ContactPageData> deleteContactUsDataById(Long id) {
+        ContactPageData contactPageData = contactPageDataRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contact Page Data not found"));
+        contactPageDataRepo.delete(contactPageData);
+        return ResponseEntity.ok(contactPageData);
     }
 }

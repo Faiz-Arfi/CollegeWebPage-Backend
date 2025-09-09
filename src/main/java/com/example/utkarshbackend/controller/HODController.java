@@ -3,6 +3,7 @@ package com.example.utkarshbackend.controller;
 import com.example.utkarshbackend.dto.DepartmentDTO;
 import com.example.utkarshbackend.dto.TeacherDetailsDTO;
 import com.example.utkarshbackend.dto.TeacherRegReqDTO;
+import com.example.utkarshbackend.entity.ContactPageData;
 import com.example.utkarshbackend.entity.Department;
 import com.example.utkarshbackend.entity.NonTeaching;
 import com.example.utkarshbackend.services.HODService;
@@ -55,6 +56,21 @@ public class HODController {
     @DeleteMapping("/non-teaching/{id}")
     public ResponseEntity<NonTeaching> deleteNonTeacher (@PathVariable Long id) {
         return hodService.deleteNonTeacher(id);
+    }
+
+    @GetMapping("/public-contactus")
+    public Page<ContactPageData> getAllContactUsData(Pageable p) {
+        return hodService.getAllContactUsData(p);
+    }
+
+    @GetMapping("/public-contactus/{id}")
+    public ContactPageData getContactUsDataById(@PathVariable Long id) {
+        return hodService.getContactUsDataById(id);
+    }
+
+    @DeleteMapping("/public-contactus")
+    public ResponseEntity<ContactPageData> deleteContactUsDataById(@PathVariable Long id) {
+        return hodService.deleteContactUsDataById(id);
     }
 
     @PutMapping("/dept/{deptId}")

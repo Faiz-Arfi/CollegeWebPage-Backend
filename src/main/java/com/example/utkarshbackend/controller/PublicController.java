@@ -3,15 +3,13 @@ package com.example.utkarshbackend.controller;
 import com.example.utkarshbackend.dto.CourseDTO;
 import com.example.utkarshbackend.dto.DepartmentDTO;
 import com.example.utkarshbackend.dto.TeacherDetailsDTO;
+import com.example.utkarshbackend.entity.ContactPageData;
 import com.example.utkarshbackend.entity.NonTeaching;
 import com.example.utkarshbackend.services.PublicService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/public")
@@ -61,5 +59,10 @@ public class PublicController {
     @GetMapping("/non-teaching/{id}")
     public ResponseEntity<NonTeaching> getNonTeacherById(@PathVariable long id) {
         return ResponseEntity.ok(publicService.getNonTeacherById(id));
+    }
+
+    @PostMapping("/contact")
+    public ResponseEntity<ContactPageData> contactUs(@RequestBody ContactPageData contactPageData) {
+        return ResponseEntity.ok(publicService.saveContactUsData(contactPageData));
     }
 }
