@@ -4,6 +4,7 @@ import com.example.utkarshbackend.dto.DepartmentDTO;
 import com.example.utkarshbackend.dto.TeacherDetailsDTO;
 import com.example.utkarshbackend.dto.TeacherRegReqDTO;
 import com.example.utkarshbackend.entity.Department;
+import com.example.utkarshbackend.entity.NonTeaching;
 import com.example.utkarshbackend.services.HODService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -39,6 +40,21 @@ public class HODController {
     @PutMapping("/update-teacher/{id}")
     public ResponseEntity<TeacherDetailsDTO> updateTeacher (@RequestBody TeacherRegReqDTO teacherRegReqDTO, @PathVariable Long id, Authentication authentication) {
         return hodService.updateTeacher(teacherRegReqDTO, id);
+    }
+
+    @PostMapping("/non-teaching")
+    public ResponseEntity<NonTeaching> registerNonTeacher (@RequestBody NonTeaching nonTeaching) {
+        return hodService.registerNewNonTeacher(nonTeaching);
+    }
+
+    @PutMapping("/non-teaching/{id}")
+    public ResponseEntity<NonTeaching> updateNonTeacher (@RequestBody NonTeaching nonTeaching, @PathVariable Long id) {
+        return hodService.updateNonTeacher(nonTeaching, id);
+    }
+
+    @DeleteMapping("/non-teaching/{id}")
+    public ResponseEntity<NonTeaching> deleteNonTeacher (@PathVariable Long id) {
+        return hodService.deleteNonTeacher(id);
     }
 
     @PutMapping("/dept/{deptId}")

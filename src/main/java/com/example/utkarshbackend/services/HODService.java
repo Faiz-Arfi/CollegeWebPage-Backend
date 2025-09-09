@@ -4,10 +4,12 @@ import com.example.utkarshbackend.dto.DepartmentDTO;
 import com.example.utkarshbackend.dto.TeacherDetailsDTO;
 import com.example.utkarshbackend.dto.TeacherRegReqDTO;
 import com.example.utkarshbackend.entity.Department;
+import com.example.utkarshbackend.entity.NonTeaching;
 import com.example.utkarshbackend.entity.Teacher;
 import com.example.utkarshbackend.mapper.DepartmentMapper;
 import com.example.utkarshbackend.mapper.TeacherMapper;
 import com.example.utkarshbackend.repository.DepartmentRepo;
+import com.example.utkarshbackend.repository.NonTeachingRepo;
 import com.example.utkarshbackend.repository.TeacherRepo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,11 +25,13 @@ public class HODService {
 
     private final TeacherRepo teacherRepo;
     private final DepartmentRepo departmentRepo;
+    private final NonTeachingRepo nonTeachingRepo;
     private final PasswordEncoder passwordEncoder;
 
-    public HODService(TeacherRepo teacherRepo, DepartmentRepo departmentRepo, PasswordEncoder passwordEncoder) {
+    public HODService(TeacherRepo teacherRepo, DepartmentRepo departmentRepo, NonTeachingRepo nonTeachingRepo, PasswordEncoder passwordEncoder) {
         this.teacherRepo = teacherRepo;
         this.departmentRepo = departmentRepo;
+        this.nonTeachingRepo = nonTeachingRepo;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -136,5 +140,46 @@ public class HODService {
         Teacher savedTeacher = teacherRepo.save(teacher);
         TeacherDetailsDTO dto = TeacherMapper.toDTO(savedTeacher);
         return ResponseEntity.ok(dto);
+    }
+
+    public ResponseEntity<NonTeaching> registerNewNonTeacher(NonTeaching nonTeaching) {
+        if (nonTeaching.getEmail() == null || nonTeaching.getName() == null || nonTeaching.getEmail().isBlank() || nonTeaching.getName().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email or Name is Required");
+        }
+        NonTeaching saved = nonTeachingRepo.save(nonTeaching);
+        return ResponseEntity.ok(saved);
+    }
+
+    public ResponseEntity<NonTeaching> updateNonTeacher(NonTeaching nonTeaching, Long id) {
+        NonTeaching existing = nonTeachingRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Non Teaching Staff not found"));
+        if (nonTeaching.getEmail() != null && !nonTeaching.getEmail().isBlank()) {
+            existing.setEmail(nonTeaching.getEmail());
+        }
+        if (nonTeaching.getName() != null && !nonTeaching.getName().isBlank()) {
+            existing.setName(nonTeaching.getName());
+        }
+        if (nonTeaching.getPhone() != null && !nonTeaching.getPhone().isBlank()) {
+            existing.setPhone(nonTeaching.getPhone());
+        }
+        if (nonTeaching.getDesignation() != null && !nonTeaching.getDesignation().isBlank()) {
+            existing.setDesignation(nonTeaching.getDesignation());
+        }
+        if (nonTeaching.getProfilePic() != null && !nonTeaching.getProfilePic().isBlank()) {
+            existing.setProfilePic(nonTeaching.getProfilePic());
+        }
+        if (nonTeaching.getEducation() != null && !nonTeaching.getEducation().isBlank()) {
+            existing.setEducation(nonTeaching.getEducation());
+        }
+        if (nonTeaching.getDepartment() != null && !nonTeaching.getDepartment().isBlank()) {
+            existing.setDepartment(nonTeaching.getDepartment());
+        }
+        NonTeaching saved = nonTeachingRepo.save(existing);
+        return ResponseEntity.ok(saved);
+    }
+
+    public ResponseEntity<NonTeaching> deleteNonTeacher(Long id) {
+        NonTeaching nonTeaching = nonTeachingRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Non Teaching Staff not found"));
+        nonTeachingRepo.delete(nonTeaching);
+        return ResponseEntity.ok(nonTeaching);
     }
 }
