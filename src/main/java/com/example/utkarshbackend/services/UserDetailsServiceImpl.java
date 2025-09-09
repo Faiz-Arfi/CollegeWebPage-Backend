@@ -63,10 +63,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     }
 
-    public UserDetails loadUserById(long id) throws UsernameNotFoundException {
+    public UserDetails loadUserById(long id, String email) throws UsernameNotFoundException {
 //        User user = userRepo.findById(id).orElseThrow(() -> new UsernameNotFoundException("User not found"));
         Optional<Admin> admin = adminRepo.findById(id);
-        if(admin.isPresent()) {
+        if(admin.isPresent() && admin.get().getEmail().equals(email)) {
             AuthUser user = new AuthUser();
             user.setId(admin.get().getId());
             user.setEmail(admin.get().getEmail());
@@ -75,7 +75,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             return buildUserDetails(user);
         }
         Optional<Teacher> teacher = teacherRepo.findById(id);
-        if(teacher.isPresent()) {
+        if(teacher.isPresent() && teacher.get().getEmail().equals(email)) {
             AuthUser user = new AuthUser();
             user.setId(teacher.get().getId());
             user.setEmail(teacher.get().getEmail());
@@ -84,7 +84,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             return buildUserDetails(user);
         }
         Optional<Student> student = studentRepo.findById(id);
-        if(student.isPresent()) {
+        if(student.isPresent() && student.get().getEmail().equals(email)) {
             AuthUser user = new AuthUser();
             user.setId(student.get().getId());
             user.setEmail(student.get().getEmail());
