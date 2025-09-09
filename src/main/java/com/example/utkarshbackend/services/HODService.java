@@ -97,4 +97,44 @@ public class HODService {
         Department saved = departmentRepo.save(existing);
         return DepartmentMapper.toDTO(saved);
     }
+
+    public ResponseEntity<TeacherDetailsDTO> deleteTeacher(Long id, Authentication authentication) {
+        Teacher teacher = teacherRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Teacher not found"));
+        if (!authentication.getAuthorities().contains("ROLE_ADMIN")) {
+            //throw error is hod is being delete by another hod
+            if(teacher.getRole().equalsIgnoreCase("HOD")) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You are not authorized to delete this HOD");
+            }
+        }
+
+        TeacherDetailsDTO dto = TeacherMapper.toDTO(teacher);
+        teacherRepo.delete(teacher);
+        return ResponseEntity.ok(dto);
+    }
+
+    public ResponseEntity<TeacherDetailsDTO> updateTeacher(TeacherRegReqDTO teacherRegReqDTO, Long id) {
+        Teacher teacher = teacherRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Teacher not found"));
+
+        if(teacherRegReqDTO.getName() != null && !teacherRegReqDTO.getName().isBlank()) {
+            teacher.setName(teacherRegReqDTO.getName());
+        }
+        if(teacherRegReqDTO.getEmail() != null && !teacherRegReqDTO.getEmail().isBlank()) {
+            teacher.setEmail(teacherRegReqDTO.getEmail());
+        }
+        if(teacherRegReqDTO.getPhone() != null && !teacherRegReqDTO.getPhone().isBlank()) {
+            teacher.setPhone(teacherRegReqDTO.getPhone());
+        }
+        if(teacherRegReqDTO.getEducation() != null && !teacherRegReqDTO.getEducation().isBlank()) {
+            teacher.setEducation(teacherRegReqDTO.getEducation());
+        }
+        if(teacherRegReqDTO.getDesignation() != null && !teacherRegReqDTO.getDesignation().isBlank()) {
+            teacher.setDesignation(teacherRegReqDTO.getDesignation());
+        }
+        if(teacherRegReqDTO.getProfilePic() != null && !teacherRegReqDTO.getProfilePic().isBlank()) {
+            teacher.setProfilePic(teacherRegReqDTO.getProfilePic());
+        }
+        Teacher savedTeacher = teacherRepo.save(teacher);
+        TeacherDetailsDTO dto = TeacherMapper.toDTO(savedTeacher);
+        return ResponseEntity.ok(dto);
+    }
 }

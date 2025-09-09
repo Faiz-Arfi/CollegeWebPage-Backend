@@ -31,6 +31,16 @@ public class HODController {
         return hodService.registerNewTeacher(teacherRegReqDTO);
     }
 
+    @DeleteMapping("/delete-teacher/{id}")
+    public ResponseEntity<TeacherDetailsDTO> deleteTeacher (@PathVariable Long id, Authentication authentication) {
+        return hodService.deleteTeacher(id, authentication);
+    }
+
+    @PutMapping("/update-teacher/{id}")
+    public ResponseEntity<TeacherDetailsDTO> updateTeacher (@RequestBody TeacherRegReqDTO teacherRegReqDTO, @PathVariable Long id, Authentication authentication) {
+        return hodService.updateTeacher(teacherRegReqDTO, id);
+    }
+
     @PutMapping("/dept/{deptId}")
     public ResponseEntity<DepartmentDTO> editDepartment (@RequestBody Department dept, Authentication authentication, @PathVariable Long deptId) {
         return ResponseEntity.ok(hodService.editDepartment(dept, deptId, authentication));
