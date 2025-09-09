@@ -44,8 +44,9 @@ public class AuthService {
     private final StudentRepo studentRepo;
     private final DepartmentRepo departmentRepo;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
-    public AuthService(AuthenticationManager authenticationManager, JwtService jwtService, TeacherRepo teacherRepo, AdminRepo adminRepo, StudentRepo studentRepo, DepartmentRepo departmentRepo, PasswordEncoder passwordEncoder) {
+    public AuthService(AuthenticationManager authenticationManager, JwtService jwtService, TeacherRepo teacherRepo, AdminRepo adminRepo, StudentRepo studentRepo, DepartmentRepo departmentRepo, PasswordEncoder passwordEncoder, EmailService emailService) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.teacherRepo = teacherRepo;
@@ -53,6 +54,7 @@ public class AuthService {
         this.studentRepo = studentRepo;
         this.departmentRepo = departmentRepo;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
     }
 
     public LoginResponseDTO login(LoginRequestDTO loginRequestDTO) {
@@ -85,7 +87,7 @@ public class AuthService {
                 return loginAsStudent(loginRequestDTO, student);
             }
             else {
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This email is not registered");
             }
         } catch (ResponseStatusException e) {
             throw e;
@@ -97,15 +99,21 @@ public class AuthService {
     }
 
     private LoginResponseDTO loginAsStudent(LoginRequestDTO loginRequestDTO, Student student) {
-        if(!student.isEmailVerified()) {
-            //To-DO: send an email verification link
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Please verify your email");
-        }
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequestDTO.getEmail(), loginRequestDTO.getPassword())
         );
 
         if (authentication.isAuthenticated()) {
+            if(!student.isEmailVerified()) {
+                //send an email verification link
+                AuthUser authUser = UserMapper.toAuthUser(student);
+
+                student.setVerificationToken(jwtService.generateToken(authUser, Integer.parseInt(emailVerificationTokenValidityTime)));
+                //TO-DO: send an email verification link
+                studentRepo.save(student);
+                emailService.sendVerificationEmail(student.getEmail(), student.getVerificationToken());
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Please verify your email");
+            }
             AuthUser authUser = UserMapper.toAuthUser(student);
             return LoginResponseDTO.builder()
                     .accessToken(jwtService.generateToken(authUser, Integer.parseInt(accessTokenValidityTime)))
@@ -223,8 +231,9 @@ public class AuthService {
 
         saved.setVerificationToken(jwtService.generateToken(authUser, Integer.parseInt(emailVerificationTokenValidityTime)));
         //TO-DO: send an email verification link
-        studentRepo.save(saved);
-        return UserMapper.toDTO(saved);
+        Student savedWithToken = studentRepo.save(saved);
+        emailService.sendVerificationEmail(saved.getEmail(), saved.getVerificationToken());
+        return UserMapper.toDTO(savedWithToken);
     }
 
     public Object getLoggedInUser(Authentication authentication) {

@@ -43,7 +43,7 @@ public class WebSecurityConfig {
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
                 .cors(cors -> cors.configurationSource(configurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/error/**", "/public/**").permitAll()
+                        .requestMatchers("/auth/**", "/error/**", "/public/**", "/verify-email/**").permitAll()
                         .requestMatchers("/student/**").authenticated()
                         .requestMatchers("/teacher/**").hasAnyRole("ADMIN","HOD","TEACHER")
                         .requestMatchers("/hod/**").hasAnyRole("HOD", "ADMIN")
