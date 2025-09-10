@@ -1,6 +1,7 @@
 package com.example.utkarshbackend.services;
 
 import com.example.utkarshbackend.dto.DepartmentDTO;
+import com.example.utkarshbackend.dto.EmailMessageReqDTO;
 import com.example.utkarshbackend.dto.TeacherDetailsDTO;
 import com.example.utkarshbackend.dto.TeacherRegReqDTO;
 import com.example.utkarshbackend.entity.ContactPageData;
@@ -30,13 +31,15 @@ public class HODService {
     private final NonTeachingRepo nonTeachingRepo;
     private final ContactPageDataRepo contactPageDataRepo;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
-    public HODService(TeacherRepo teacherRepo, DepartmentRepo departmentRepo, NonTeachingRepo nonTeachingRepo, ContactPageDataRepo contactPageDataRepo, PasswordEncoder passwordEncoder) {
+    public HODService(TeacherRepo teacherRepo, DepartmentRepo departmentRepo, NonTeachingRepo nonTeachingRepo, ContactPageDataRepo contactPageDataRepo, PasswordEncoder passwordEncoder, EmailService emailService) {
         this.teacherRepo = teacherRepo;
         this.departmentRepo = departmentRepo;
         this.nonTeachingRepo = nonTeachingRepo;
         this.contactPageDataRepo = contactPageDataRepo;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
     }
 
     public boolean doesTeacherExistByEmail (String email) {
@@ -198,6 +201,15 @@ public class HODService {
     public ResponseEntity<ContactPageData> deleteContactUsDataById(Long id) {
         ContactPageData contactPageData = contactPageDataRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contact Page Data not found"));
         contactPageDataRepo.delete(contactPageData);
+        return ResponseEntity.ok(contactPageData);
+    }
+
+    public ResponseEntity<ContactPageData> sendEmail(Long id, EmailMessageReqDTO emailMessageReqDTO) {
+        ContactPageData contactPageData = contactPageDataRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contact Page Data not found"));
+        if(emailMessageReqDTO.getSubject() == null || emailMessageReqDTO.getSubject().isBlank()) {
+            emailMessageReqDTO.setSubject("Thanks for reaching out to UCET help and support");
+        }
+        emailService.sendContactUsEmail(contactPageData.getEmail(), emailMessageReqDTO.getSubject(), emailMessageReqDTO.getMessage());
         return ResponseEntity.ok(contactPageData);
     }
 }

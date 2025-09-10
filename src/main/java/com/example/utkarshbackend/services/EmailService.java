@@ -32,6 +32,48 @@ public class EmailService {
         sendEmail(toEmail, subject, body, path, resetToken);
     }
 
+    public void sendContactUsEmail(String toEmail, String subject, String body) {
+        sendContactEmail(toEmail, subject, body);
+    }
+
+    private void sendContactEmail(String toEmail, String subject, String body) {
+        try {
+            String content = """
+                <div style="font-family: Arial, sans-serif; max-width: 650px; margin: auto; padding: 25px; 
+                            border: 1px solid #dcdcdc; border-radius: 8px; background-color: #ffffff;">
+                    
+                    <div style="text-align: center; padding-bottom: 15px; border-bottom: 2px solid #004080;">
+                        <h2 style="color: #004080; margin: 0;">%s</h2>
+                    </div>
+                    
+                    <div style="padding: 20px 0; color: #333333; font-size: 15px; line-height: 1.6;">
+                        %s
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 15px; background-color: #f5f8fc; 
+                                border-left: 4px solid #004080; border-radius: 4px; font-size: 14px; color: #333;">
+                        <p style="margin: 0;">Thank you for contacting us. Our team will get back to you shortly. 
+                        If your inquiry is urgent, please reach out to the administration office directly.</p>
+                    </div>
+                    <div style="text-align: center; margin-top: 25px; font-size: 13px; color: #777;">
+                        <p style="margin: 0;">&copy; %d UCET, VBU, Hazaribag. All rights reserved.</p>
+                    </div>
+                </div>
+            """.formatted(subject, body, java.time.Year.now().getValue());
+            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+
+            helper.setTo(toEmail);
+            helper.setSubject(subject);
+            helper.setFrom(fromEmail);
+            helper.setText(content, true);
+            javaMailSender.send(mimeMessage);
+        } catch (Exception e) {
+            System.err.println("Error sending email: " + e.getMessage());
+            throw new RuntimeException("Failed to send email", e);
+        }
+    }
+
     private void sendEmail(String toEmail, String subject, String body, String path, String token) {
         try {
             String actionUrl = ServletUriComponentsBuilder.fromCurrentContextPath()

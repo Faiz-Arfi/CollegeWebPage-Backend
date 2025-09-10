@@ -1,6 +1,7 @@
 package com.example.utkarshbackend.controller;
 
 import com.example.utkarshbackend.dto.DepartmentDTO;
+import com.example.utkarshbackend.dto.EmailMessageReqDTO;
 import com.example.utkarshbackend.dto.TeacherDetailsDTO;
 import com.example.utkarshbackend.dto.TeacherRegReqDTO;
 import com.example.utkarshbackend.entity.ContactPageData;
@@ -76,6 +77,11 @@ public class HODController {
     @PutMapping("/dept/{deptId}")
     public ResponseEntity<DepartmentDTO> editDepartment (@RequestBody Department dept, Authentication authentication, @PathVariable Long deptId) {
         return ResponseEntity.ok(hodService.editDepartment(dept, deptId, authentication));
+    }
+
+    @PostMapping("/reply-contact-us/{id}")
+    public ResponseEntity<ContactPageData> replyToContactUs (@PathVariable Long id, @RequestBody EmailMessageReqDTO emailMessageReqDTO) {
+        return hodService.sendEmail(id, emailMessageReqDTO);
     }
 
 }
