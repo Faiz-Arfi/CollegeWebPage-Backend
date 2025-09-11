@@ -1,5 +1,6 @@
 package com.example.utkarshbackend.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -46,4 +47,8 @@ public class Student {
             inverseJoinColumns = @JoinColumn(name = "course_code")
     )
     private List<Course> courses;
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Fee> fees;
 }

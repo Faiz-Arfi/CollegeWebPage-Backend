@@ -1,27 +1,32 @@
 package com.example.utkarshbackend.controller;
 
-import com.example.utkarshbackend.dto.DepartmentDTO;
-import com.example.utkarshbackend.dto.EmailMessageReqDTO;
-import com.example.utkarshbackend.dto.TeacherDetailsDTO;
-import com.example.utkarshbackend.dto.TeacherRegReqDTO;
+import com.example.utkarshbackend.dto.*;
 import com.example.utkarshbackend.entity.ContactPageData;
 import com.example.utkarshbackend.entity.Department;
+import com.example.utkarshbackend.entity.FeeStatus;
 import com.example.utkarshbackend.entity.NonTeaching;
+import com.example.utkarshbackend.services.FeeService;
 import com.example.utkarshbackend.services.HODService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/hod")
 public class HODController {
 
     private final HODService hodService;
+    private final FeeService feeService;
 
-    public HODController(HODService hodService) {
+    public HODController(HODService hodService, FeeService feeService) {
         this.hodService = hodService;
+        this.feeService = feeService;
     }
 
     @GetMapping("/get-all-teacher")
@@ -82,6 +87,47 @@ public class HODController {
     @PostMapping("/reply-contact-us/{id}")
     public ResponseEntity<ContactPageData> replyToContactUs (@PathVariable Long id, @RequestBody EmailMessageReqDTO emailMessageReqDTO) {
         return hodService.sendEmail(id, emailMessageReqDTO);
+    }
+
+    @PostMapping("/student/{studentId}")
+    public ResponseEntity<FeeResponseDTO> createFeeForStudent(
+            @PathVariable Long studentId,
+            @Valid @RequestBody FeeRequestDTO feeRequestDTO) {
+        FeeResponseDTO newFee = feeService.createFee(studentId, feeRequestDTO);
+        return new ResponseEntity<>(newFee, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/student/{studentId}/fees/{feeId}")
+    public ResponseEntity<Void> deleteFeeForStudent(
+            @PathVariable Long studentId,
+            @PathVariable Long feeId) {
+        feeService.deleteFee(studentId, feeId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/student/{studentId}/fees/{feeId}")
+    public ResponseEntity<FeeResponseDTO> updateFeeForStudent(
+            @PathVariable Long studentId,
+            @PathVariable Long feeId,
+            @Valid @RequestBody FeeRequestDTO feeRequestDTO) {
+        FeeResponseDTO updatedFee = feeService.updateFee(studentId, feeId, feeRequestDTO);
+        return ResponseEntity.ok(updatedFee);
+    }
+
+    @PostMapping("/student/{studentId}/fees/{feeId}/payments")
+    public ResponseEntity<FeeResponseDTO> recordPaymentForStudent(
+            @PathVariable Long studentId,
+            @PathVariable Long feeId,
+            @Valid @RequestBody PaymentRequestDTO paymentRequestDTO) {
+        FeeResponseDTO updatedFee = feeService.recordPayment(studentId, feeId, paymentRequestDTO);
+        return ResponseEntity.ok(updatedFee);
+    }
+
+    @GetMapping("/fees")
+    public ResponseEntity<List<FeeResponseDTO>> getFeesByStatus(
+            @RequestParam(required = false)FeeStatus status) {
+        List<FeeResponseDTO> fees = feeService.findFeesByCriteria(status);
+        return ResponseEntity.ok(fees);
     }
 
 }

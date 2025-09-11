@@ -48,6 +48,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/teacher/**").hasAnyRole("ADMIN","HOD","TEACHER")
                         .requestMatchers("/hod/**").hasAnyRole("HOD", "ADMIN")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/student/**").hasAnyRole("STUDENT")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
