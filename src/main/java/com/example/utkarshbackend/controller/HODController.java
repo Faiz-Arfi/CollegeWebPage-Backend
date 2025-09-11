@@ -7,6 +7,7 @@ import com.example.utkarshbackend.entity.FeeStatus;
 import com.example.utkarshbackend.entity.NonTeaching;
 import com.example.utkarshbackend.services.FeeService;
 import com.example.utkarshbackend.services.HODService;
+import com.example.utkarshbackend.services.StudentService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,10 +24,12 @@ public class HODController {
 
     private final HODService hodService;
     private final FeeService feeService;
+    private final StudentService studentService;
 
-    public HODController(HODService hodService, FeeService feeService) {
+    public HODController(HODService hodService, FeeService feeService, StudentService studentService, StudentService studentService1) {
         this.hodService = hodService;
         this.feeService = feeService;
+        this.studentService = studentService1;
     }
 
     @GetMapping("/get-all-teacher")
@@ -128,6 +131,18 @@ public class HODController {
             @RequestParam(required = false)FeeStatus status) {
         List<FeeResponseDTO> fees = feeService.findFeesByCriteria(status);
         return ResponseEntity.ok(fees);
+    }
+
+    @GetMapping("/student")
+    public ResponseEntity<Page<StudentDTO>> getAllStudents(Pageable p) {
+        Page<StudentDTO> studentDTOPage = studentService.getAllStudent(p);
+        return ResponseEntity.ok(studentDTOPage);
+    }
+
+    @GetMapping("/student/{id}")
+    public ResponseEntity<StudentDTO> getStudentById(@PathVariable Long id) {
+        StudentDTO studentDTO = studentService.getStudentById(id);
+        return ResponseEntity.ok(studentDTO);
     }
 
 }
