@@ -1,12 +1,10 @@
 package com.example.utkarshbackend.controller;
 
 import com.example.utkarshbackend.dto.*;
-import com.example.utkarshbackend.entity.ContactPageData;
-import com.example.utkarshbackend.entity.Department;
-import com.example.utkarshbackend.entity.FeeStatus;
-import com.example.utkarshbackend.entity.NonTeaching;
+import com.example.utkarshbackend.entity.*;
 import com.example.utkarshbackend.services.FeeService;
 import com.example.utkarshbackend.services.HODService;
+import com.example.utkarshbackend.services.StudentService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,10 +21,12 @@ public class HODController {
 
     private final HODService hodService;
     private final FeeService feeService;
+    private final StudentService studentService;
 
-    public HODController(HODService hodService, FeeService feeService) {
+    public HODController(HODService hodService, FeeService feeService, StudentService studentService) {
         this.hodService = hodService;
         this.feeService = feeService;
+        this.studentService = studentService;
     }
 
     @GetMapping("/get-all-teacher")
@@ -128,6 +128,18 @@ public class HODController {
             @RequestParam(required = false)FeeStatus status) {
         List<FeeResponseDTO> fees = feeService.findFeesByCriteria(status);
         return ResponseEntity.ok(fees);
+    }
+
+    @GetMapping("/student")
+    public ResponseEntity<Page<StudentDTO>> getAllStudent(Pageable p) {
+        Page<StudentDTO> studentPage = studentService.getAllStudent(p);
+        return ResponseEntity.ok(studentPage);
+    }
+
+    @GetMapping("/student/{studentId}")
+    public ResponseEntity<StudentDTO> getStudentById(@PathVariable Long studentId) {
+        StudentDTO student = studentService.getStudentById(studentId);
+        return ResponseEntity.ok(student);
     }
 
 }
