@@ -1,8 +1,10 @@
 package com.example.utkarshbackend.controller;
 
+import com.example.utkarshbackend.dto.StudentDTO;
 import com.example.utkarshbackend.entity.Fee;
 import com.example.utkarshbackend.services.FeeService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,6 +32,11 @@ public class StudentController {
     public ResponseEntity<Fee> getStudentFeeOfSemester(@PathVariable Long studentId, @PathVariable Integer semester) {
         Fee fee = feeService.getStudentFeeOfSemester(studentId, semester);
         return ResponseEntity.ok(fee);
+    }
+
+    @GetMapping("/{studentId}")
+    public ResponseEntity<StudentDTO> getStudentById(@PathVariable Long studentId, Authentication authentication) {
+        return ResponseEntity.ok().body(feeService.getStudentById(studentId, authentication));
     }
 
 }

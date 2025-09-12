@@ -3,15 +3,18 @@ package com.example.utkarshbackend.services;
 import com.example.utkarshbackend.dto.FeeRequestDTO;
 import com.example.utkarshbackend.dto.FeeResponseDTO;
 import com.example.utkarshbackend.dto.PaymentRequestDTO;
+import com.example.utkarshbackend.dto.StudentDTO;
 import com.example.utkarshbackend.entity.Fee;
 import com.example.utkarshbackend.entity.FeeStatus;
 import com.example.utkarshbackend.entity.Student;
 import com.example.utkarshbackend.mapper.FeeMapper;
+import com.example.utkarshbackend.mapper.StudentMapper;
 import com.example.utkarshbackend.repository.FeeRepo;
 import com.example.utkarshbackend.repository.StudentRepo;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -153,4 +156,13 @@ public class FeeService {
         return feeRepo.findById(id).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Fee with id not found"));
     }
 
+    public StudentDTO getStudentById(Long studentId, Authentication authentication) {
+        Student student = findStudentById(studentId);
+        String email = authentication.getName();
+        if(student.getEmail().equals(email)) {
+            return StudentMapper.toStudentDTO(student);
+        } else {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to view this student");
+        }
+    }
 }

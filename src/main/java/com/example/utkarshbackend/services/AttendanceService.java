@@ -3,15 +3,16 @@ package com.example.utkarshbackend.services;
 import com.example.utkarshbackend.dto.AttendanceRequestDTO;
 import com.example.utkarshbackend.dto.AttendanceResponseDTO;
 import com.example.utkarshbackend.entity.Attendance;
-import com.example.utkarshbackend.entity.Course;
 import com.example.utkarshbackend.entity.Student;
 import com.example.utkarshbackend.entity.constants.AttendanceStatus;
 import com.example.utkarshbackend.repository.AttendanceRepository;
 import com.example.utkarshbackend.repository.CourseRepo;
 import com.example.utkarshbackend.repository.StudentRepo;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -74,5 +75,14 @@ public class AttendanceService {
                 status,
                 courseCode
         );
+    }
+
+    public List<AttendanceResponseDTO> getAttendanceByStudentId(Long studentId, String email) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new EntityNotFoundException("Student not found."));
+        if(!student.getEmail().equals(email)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to view this student");
+        }
+        return getAttendanceByStudentRollNo(student.getRollNo());
     }
 }

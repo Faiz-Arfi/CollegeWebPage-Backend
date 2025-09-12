@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -24,6 +25,14 @@ public class AttendanceController {
     @PreAuthorize("hasAnyRole('ADMIN', 'HOD', 'TEACHER', 'STUDENT')")
     public ResponseEntity<List<AttendanceResponseDTO>> getStudentAttendance(@PathVariable String rollNo) {
         List<AttendanceResponseDTO> attendances = attendanceService.getAttendanceByStudentRollNo(rollNo);
+        return ResponseEntity.ok(attendances);
+    }
+
+    @GetMapping("/student/id/{studentId}")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<List<AttendanceResponseDTO>> getStudentAttendanceById(@PathVariable Long studentId, Authentication authentication) {
+        String email = authentication.getName();
+        List<AttendanceResponseDTO> attendances = attendanceService.getAttendanceByStudentId(studentId, email);
         return ResponseEntity.ok(attendances);
     }
 

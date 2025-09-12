@@ -222,6 +222,7 @@ public class AuthService {
         student.setName(studentRegRequestDTO.getName());
         student.setPassword(encodePassword(studentRegRequestDTO.getPassword()));
         student.setRegNo(studentRegRequestDTO.getRegNo());
+        student.setRollNo(studentRegRequestDTO.getRollNo());
         student.setDepartment(dept);
         student.setEmailVerified(false);
         student.setRole("STUDENT");
