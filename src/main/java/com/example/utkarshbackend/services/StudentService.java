@@ -4,7 +4,6 @@ import com.example.utkarshbackend.dto.StudentDTO;
 import com.example.utkarshbackend.entity.Student;
 import com.example.utkarshbackend.mapper.StudentMapper;
 import com.example.utkarshbackend.repository.StudentRepo;
-import com.example.utkarshbackend.mapper.StudentMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
