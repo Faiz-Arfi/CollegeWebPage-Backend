@@ -30,7 +30,6 @@ public class StudentDTO {
     private String admissionYear;
     private String admissionStatus;
     private String role;
-
     private String departmentId;
 
     private List<Fee> fees;

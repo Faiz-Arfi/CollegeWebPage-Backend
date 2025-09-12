@@ -51,4 +51,9 @@ public class Student {
     @JsonManagedReference
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Fee> fees;
+
+    // Add this new field for the attendance relationship
+    @JsonManagedReference
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Attendance> attendances;
 }
