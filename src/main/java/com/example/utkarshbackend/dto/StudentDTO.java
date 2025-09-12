@@ -35,5 +35,4 @@ public class StudentDTO {
     private String departmentId;
 
     private List<Fee> fees;
-
 }
