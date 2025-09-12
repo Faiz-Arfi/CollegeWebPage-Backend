@@ -1,5 +1,6 @@
 package com.example.utkarshbackend.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,4 +34,9 @@ public class Course {
 
     @ManyToMany(mappedBy = "courses")
     private List<Student> students = new ArrayList<>();
+
+    // Add this new field for the attendance relationship
+    @JsonManagedReference
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Attendance> attendances;
 }

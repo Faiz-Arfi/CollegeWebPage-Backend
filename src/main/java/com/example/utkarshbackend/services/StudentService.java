@@ -4,6 +4,7 @@ import com.example.utkarshbackend.dto.StudentDTO;
 import com.example.utkarshbackend.entity.Student;
 import com.example.utkarshbackend.mapper.StudentMapper;
 import com.example.utkarshbackend.repository.StudentRepo;
+import com.example.utkarshbackend.mapper.StudentMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -20,12 +21,13 @@ public class StudentService {
     }
 
     public Page<StudentDTO> getAllStudent(Pageable p) {
-        Page<Student> page = studentRepo.findAll(p);
-        return page.map(StudentMapper::toStudentDTO);
+        Page<Student> studentPage =  studentRepo.findAll(p);
+        return studentPage.map(StudentMapper::toStudentDTO);
     }
 
-    public StudentDTO getStudentById(Long id) {;
-        Student student = studentRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
+    public StudentDTO getStudentById(Long studentId) {
+        Student student = studentRepo.findById(studentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
         return StudentMapper.toStudentDTO(student);
     }
 }

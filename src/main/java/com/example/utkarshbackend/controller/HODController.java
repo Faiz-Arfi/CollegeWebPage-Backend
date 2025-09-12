@@ -1,10 +1,7 @@
 package com.example.utkarshbackend.controller;
 
 import com.example.utkarshbackend.dto.*;
-import com.example.utkarshbackend.entity.ContactPageData;
-import com.example.utkarshbackend.entity.Department;
-import com.example.utkarshbackend.entity.FeeStatus;
-import com.example.utkarshbackend.entity.NonTeaching;
+import com.example.utkarshbackend.entity.*;
 import com.example.utkarshbackend.services.FeeService;
 import com.example.utkarshbackend.services.HODService;
 import com.example.utkarshbackend.services.StudentService;
@@ -26,10 +23,10 @@ public class HODController {
     private final FeeService feeService;
     private final StudentService studentService;
 
-    public HODController(HODService hodService, FeeService feeService, StudentService studentService, StudentService studentService1) {
+    public HODController(HODService hodService, FeeService feeService, StudentService studentService) {
         this.hodService = hodService;
         this.feeService = feeService;
-        this.studentService = studentService1;
+        this.studentService = studentService;
     }
 
     @GetMapping("/get-all-teacher")
@@ -134,15 +131,15 @@ public class HODController {
     }
 
     @GetMapping("/student")
-    public ResponseEntity<Page<StudentDTO>> getAllStudents(Pageable p) {
-        Page<StudentDTO> studentDTOPage = studentService.getAllStudent(p);
-        return ResponseEntity.ok(studentDTOPage);
+    public ResponseEntity<Page<StudentDTO>> getAllStudent(Pageable p) {
+        Page<StudentDTO> studentPage = studentService.getAllStudent(p);
+        return ResponseEntity.ok(studentPage);
     }
 
-    @GetMapping("/student/{id}")
-    public ResponseEntity<StudentDTO> getStudentById(@PathVariable Long id) {
-        StudentDTO studentDTO = studentService.getStudentById(id);
-        return ResponseEntity.ok(studentDTO);
+    @GetMapping("/student/{studentId}")
+    public ResponseEntity<StudentDTO> getStudentById(@PathVariable Long studentId) {
+        StudentDTO student = studentService.getStudentById(studentId);
+        return ResponseEntity.ok(student);
     }
 
 }

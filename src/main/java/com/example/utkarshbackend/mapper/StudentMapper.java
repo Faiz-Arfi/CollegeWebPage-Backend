@@ -28,10 +28,7 @@ public class StudentMapper {
                 .admissionYear(student.getAdmissionYear())
                 .admissionStatus(student.getAdmissionStatus())
                 .role(student.getRole())
-                // Handle the Department relationship: extract only the ID.
-                // Check for null to prevent NullPointerException if a student has no department.
                 .departmentId(student.getDepartment() != null ? String.valueOf(student.getDepartment().getId()) : null)
-                // Directly map the list of fees. See suggestion below for improvement.
                 .fees(student.getFees())
                 .build();
     }
@@ -45,4 +42,3 @@ public class StudentMapper {
                 .collect(Collectors.toList());
     }
 }
-
